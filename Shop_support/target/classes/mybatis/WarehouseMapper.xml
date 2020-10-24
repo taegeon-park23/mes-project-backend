@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.mybatis.persistence.WarehouseMapper">
+	<resultMap type="org.mybatis.domain.Warehouse" id="warehouseResultMap">
+		<id column="WRH_CODE" property="wrhCode" />
+		<result column="WRH_LOCATION" property="wrhLocation" />
+		<result column="WRH_KIND" property="wrhKind" />
+		<result column="WR_CODE" property="wrCode" />
+		<result column="WRH_COUNT" property="wrhCount" />
+	</resultMap>
+	
+	<update id="updateWrCount" parameterType="org.mybatis.domain.Warehouse">
+		UPDATE WAREHOUSE SET WRH_COUNT = WRH_COUNT + (#{wrhCount})
+		WHERE WR_CODE = #{wrCode} 
+			AND WRH_KIND = #{wrhKind}
+	</update>
+</mapper>

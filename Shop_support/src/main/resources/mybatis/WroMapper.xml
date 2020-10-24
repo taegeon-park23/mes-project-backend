@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="org.mybatis.persistence.WroMapper">
+	<resultMap type="org.mybatis.domain.Wro" id="wroResultMap">
+		<id column="WRO_CODE" property="wroCode" />
+		<result column="WR_CODE" property="wrCode" />
+		<result column="WR_COUNT" property="wrCount" />
+		<result column="WRO_DATE" property="wroDate" />
+		<result column="REF" property="ref" />
+		<result column="LOT_NUMBER" property="lotNumber" />
+	</resultMap>
+
+	<insert id='insert' parameterType="org.mybatis.domain.Wro">
+		INSERT INTO
+		WRO
+		VALUES(#{wroCode}, #{wrCode}, #{wrCount}, #{wroDate}, #{ref},
+		#{lotNumber})
+	</insert>
+
+	<update id="update" parameterType="string">
+		UPDATE WRO SET REF = true WHERE LOT_NUMBER = #{lotNumber}
+	</update>
+
+	<select id="list" parameterType="org.mybatis.domain.Wro"
+		resultType="java.util.HashMap">
+		SELECT WR.WRO_CODE, W.WR_NAME, WR.WR_COUNT, WR.WRO_DATE, WR.REF, WR.LOT_NUMBER
+		FROM WRO AS WR,
+			WARE AS W
+		WHERE WR.WR_CODE = W.WR_CODE
+		ORDER BY WRO_DATE
+		LIMIT 10;
+	</select>
+	
+	<update id="updateRef" parameterType="string">
+		UPDATE WRO SET REF= true WHERE LOT_NUMBER = #{lotNumber}
+	</update>
+	
+	<select id="selectRef" parameterType="string" resultType="boolean">
+		SELECT REF FROM WRO WHERE WRO_CODE = #{wroCode}
+	</select>
+</mapper>

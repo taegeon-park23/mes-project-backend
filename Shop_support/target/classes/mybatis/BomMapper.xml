@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="org.mybatis.persistence.BomMapper">
+	<resultMap type="org.mybatis.domain.Bom" id="bomResultMap">
+		<id column="BOM_CODE" property="bomCode" />
+		<result column="WR_PARENT_CODE" property="wrParentCode" />
+		<result column="WR_CHILD_CODE" property="wrChildCode" />
+		<result column="BOM_COUNT" property="bomCount" />
+	</resultMap>
+
+	<select id='list' parameterType="string"
+		resultMap="bomResultMap">
+		SELECT * FROM BOM WHERE WR_PARENT_CODE = #{wrCode}
+	</select>
+		
+	<select id="switch" parameterType="string" resultMap="bomResultMap">
+		SELECT BOM_CODE, WR_PARENT_CODE, WR_CHILD_CODE, BOM_COUNT
+		FROM BOM WHERE WR_PARENT_CODE = #{wrChildCode};
+	</select>
+</mapper>

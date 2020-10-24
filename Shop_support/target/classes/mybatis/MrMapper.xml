@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="org.mybatis.persistence.MrMapper">
+	<resultMap type="org.mybatis.domain.Mr" id="mrResultMap">
+		<id column="MR_CODE" property="mrCode" />
+		<result column="WR_CODE" property="wrCode" />
+		<result column="BSN_NUMBER" property="bsnNumber" />
+		<result column="WR_COUNT" property="wrCount" />
+		<result column="WR_COUNT_CUR" property="wrCountCur" />
+		<result column="MR_DATE" property="mrDate" />
+		<result column="REF" property="ref" />
+		<result column="LOT_NUMBER" property="lotNumber" />
+	</resultMap>
+
+	<insert id='insert' parameterType="hashMap">
+		<selectKey keyColumn="BSN_NUMBER" keyProperty="bsnNumber" resultType="String" order="BEFORE">
+				SELECT BSN_NUMBER FROM WARE WHERE WR_CODE = #{wrCode}
+		</selectKey>
+		INSERT INTO MR(MR_CODE, WR_CODE, BSN_NUMBER, WR_COUNT, MR_DATE, REF, LOT_NUMBER)
+		VALUES(#{mrCode},#{wrCode}, #{bsnNumber}, #{wrCount}, #{mrDate}, #{ref},
+		#{lotNumber})
+	</insert>
+	
+	<select id="list" parameterType="org.mybatis.domain.Mr" resultType="java.util.HashMap">
+		SELECT M.MR_CODE, M.WR_CODE, W.WR_NAME, M.BSN_NUMBER, A.BSN_NAME, M.WR_COUNT, M.MR_DATE, M.LOT_NUMBER, M.WR_COUNT_CUR, M.REF
+		FROM MR AS M,
+			ACCOUNT AS A,
+		    WARE AS W
+		WHERE M.BSN_NUMBER = A.BSN_NUMBER 
+			AND W.WR_CODE = M.WR_CODE
+		ORDER BY MR_DATE
+		LIMIT 10
+	</select>
+	
+	<update id="updateWrCountCur" parameterType="org.mybatis.domain.Mr">
+			UPDATE MR SET WR_COUNT_CUR = WR_COUNT_CUR + #{wrCountCur} WHERE MR_CODE = #{mrCode}
+	</update>
+	
+	<update id="updateRef" parameterType="org.mybatis.domain.Mr">
+			UPDATE MR SET REF = 1 WHERE MR_CODE = #{mrCode}
+	</update>
+	
+	<select id="selectOne" parameterType="org.mybatis.domain.Mr" resultMap="mrResultMap">
+		SELECT * FROM MR WHERE MR_CODE = #{mrCode}
+	</select>
+	
+	<select id="selectRefs" parameterType="org.mybatis.domain.Mr" resultType="boolean">
+		SELECT REF FROM MR WHERE LOT_NUMBER = #{lotNumber}
+	</select>
+</mapper>

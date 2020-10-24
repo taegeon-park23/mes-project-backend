@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="org.mybatis.persistence.ShopMapper">
+	<resultMap type="org.mybatis.domain.Shop" id="shopResultMap">
+		<id column="SHOP_NO" property="shopNo" />
+		<result column="SHOP_NAME" property="shopName" />
+		<result column="SHOP_LOCATION" property="shopLocation" />
+		<result column="SHOP_STATUS" property="shopStatus" />
+	</resultMap>
+
+	<select id="list" parameterType="org.mybatis.domain.Shop" resultMap="shopResultMap">
+		SELECT SHOP_NO, SHOP_NAME, SHOP_LOCATION, SHOP_STATUS
+		FROM SHOP
+		<where>
+			<if test="shopNo>0">
+				AND SHOP_NO = #{shopNo}
+			</if>
+			<if test="shopStatus != null and shopStatus != ''">
+				AND SHOP_STATUS = #{shopStatus}
+			</if>
+		</where>
+	</select>
+	
+	<insert id='insert' parameterType="org.mybatis.domain.Shop">
+		<selectKey keyColumn="SHOP_NO" keyProperty="shopNo" resultType="int" order="BEFORE">
+			SELECT MAX(SHOP_NO)+1 FROM SHOP
+		</selectKey>
+		INSERT INTO Shop(SHOP_NO, SHOP_NAME, SHOP_LOCATION, SHOP_STATUS)
+		VALUES(#{shopNo}, #{shopName},#{shopLocation}, #{shopStatus})
+	</insert>
+	
+	<select id="selectOne" parameterType="java.lang.String" resultMap="shopResultMap">
+		SELECT SHOP_NO, SHOP_NAME, SHOP_LOCATION, SHOP_STATUS
+		FROM SHOP WHERE SHOP_NO = #{shopNo}
+	</select>
+	
+	<update id="update" parameterType="org.mybatis.domain.Shop">
+		UPDATE SHOP 
+<!-- 		SET 
+			SHOP_NAME=#{shopName}, 
+			SHOP_LOCATION=#{shopLocation}, 
+			SHOP_STATUS=#{shopStatus}
+		WHERE SHOP_NO = #{shopNo} -->
+		<set>
+			<if test="shopName != null">SHOP_NAME = #{shopName}, </if>
+			<if test="shopLocation != null">SHOP_LOCATION = #{shopLocation}, </if>
+			<if test="shopStatus != null">SHOP_STATUS = #{shopStatus}, </if>
+		</set>
+		<where>
+			<if test="shopNo != null">SHOP_NO = #{shopNo} </if>
+		</where>
+	</update>
+	
+	<delete id="delete" parameterType="java.lang.String">
+		<if test="shopNo != null">
+			DELETE FROM SHOP WHERE SHOP_NO = #{shopNo};
+		</if>
+	</delete>
+</mapper>

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.mybatis.persistence.WoMapper">
+	<resultMap type="org.mybatis.domain.Wo" id="woResultMap">
+		<id column="WO_CODE" property="woCode" />
+		<result column="WRO_CODE" property="wroCode" />
+		<result column="WR_CODE" property="wrCode" />
+		<result column="WRP_CODE" property="wrpCode"/>
+		<result column="WR_COUNT" property="wrCount"/>
+		<result column="WR_COUNT_CUR" property="wrCountCur"/>
+		<result column="WO_STATE" property="woState"/>
+		<result column="WO_SDATE" property="woSdate"/>
+		<result column="WO_EDATE" property="woEdate"/>
+		<result column="REF" property="ref"/>
+		<result column="LOT_NUMBER" property="lotNumber"/>
+	</resultMap>
+
+	<insert id="insert" parameterType="hashMap">
+		INSERT INTO WO(WO_CODE, WR_COUNT, WR_CODE, WRO_CODE, WRP_CODE, LOT_NUMBER) 
+			(SELECT CONCAT(WRO.WRO_CODE,'[',WR.WR_CODE,']') AS WO_CODE ,BOM_COUNT * WR_COUNT as WO_COUNT , WR.WR_CODE, WRO_CODE, WRP_CODE, WRO.LOT_NUMBER
+			FROM BOM, WRO, WARE AS WR, WRP
+			WHERE WR.WR_CODE = #{wrCode} AND WRO_CODE = #{wroCode} AND WRP.WR_CODE = WR.WR_CODE
+      			AND 
+      			(
+					( (WR_KIND = '제품') AND (BOM.WR_PARENT_CODE = WR.WR_CODE) )
+					OR ( (WR_KIND ='반제품') AND (BOM.WR_CHILD_CODE = WR.WR_CODE) )
+      			)
+			GROUP BY WRP_CODE); 
+	</insert>
+	
+	<select id="list" parameterType="hashMap" resultType="hashMap">
+		SELECT WO_CODE, WRO_CODE, WO.WR_CODE, WARE.WR_NAME, WO.WR_COUNT, WO.WR_COUNT_CUR, WO.WRP_CODE, WRP.WRP_NAME, WO_SDATE, WO_EDATE, WO.REF, LOT_NUMBER 
+		FROM WO, WARE, WRP
+		WHERE WO.WR_CODE = WARE.WR_CODE AND WO.WR_CODE = WRP.WR_CODE  
+	</select>
+	
+	<update id="updateRef" parameterType="string">
+		UPDATE WO SET REF = true WHERE LOT_NUMBER = #{lotNumber}
+	</update>
+	
+	<select id="selectAvailable" parameterType="hashMap" resultType="boolean">
+		SELECT IF(COUNT(*)>0, false, true) AS RESULT
+		FROM BOM, WRO, WARE AS WR, WRP, WAREHOUSE
+		WHERE WR.WR_CODE = #{WR_CODE} 
+			AND WRO_CODE = #{WRO_CODE} 
+			AND WRP.WR_CODE = WR.WR_CODE
+			AND WR_PARENT_CODE = #{WR_CODE}
+    		AND WAREHOUSE.WR_CODE = BOM.WR_CHILD_CODE
+    		AND WRH_KIND = "원자재"
+    		AND<![CDATA[WRH_COUNT < BOM_COUNT * WRO.WR_COUNT]]>
+	</select>
+	
+	<update id="updateWrCurrentCur" parameterType="hashMap">
+		<selectKey keyColumn="WO_SDATE" keyProperty="WO_SDATE" resultType="java.util.Date" order="BEFORE">
+			SELECT IF(WO_SDATE IS NULL, now(), WO_SDATE) AS WO_SDATE FROM WO WHERE WO_CODE = #{WO_CODE}
+		</selectKey>
+		UPDATE WO SET 
+			WO_SDATE = #{WO_SDATE}
+		WHERE WO_CODE = #{WO_CODE}
+	</update>
+	
+	<select id="selectByWoCode" parameterType="string" resultMap="woResultMap">
+		SELECT * FROM WO WHERE WO_CODE = #{woCode}
+	</select>
+	
+</mapper>

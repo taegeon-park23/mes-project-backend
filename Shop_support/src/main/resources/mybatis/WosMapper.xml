@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.mybatis.persistence.WosMapper">
+	<resultMap type="org.mybatis.domain.Wo" id="wosResultMap">
+		<id column="WOS_CODE" property="wosCode" />
+		<result column="WO_CODE" property="woCode" />
+		<result column="WR_CODE" property="wrCode" />
+		<result column="WRP_CODE" property="wrpCode"/>
+		<result column="WR_COUNT" property="wrCount"/>
+		<result column="WR_COUNT_CUR" property="wrCountCur"/>
+		<result column="WOS_STATE" property="wosState"/>
+		<result column="WOS_SDATE" property="wosSdate"/>
+		<result column="WOS_EDATE" property="wosEdate"/>
+		<result column="LOT_NUMBER" property="lotNumber"/>
+	</resultMap>
+	
+	<insert id="insertByWo" parameterType="org.mybatis.domain.Wo">
+		<selectKey keyColumn="WR_COUNT" keyProperty="wrCount" resultType="int" order="BEFORE">
+			SELECT COUNT(WOS_CODE) AS WO_COUNT FROM WOS WHERE WO_CODE = #{woCode}
+		</selectKey>
+		INSERT INTO WOS(WOS_CODE, WO_CODE, WR_CODE, WRP_CODE, WR_COUNT, WOS_STATE, WOS_SDATE, WOS_EDATE, LOT_NUMBER)
+		VALUES(CONCAT(#{woCode},#{wrCount}), #{woCode}, #{wrCode}, #{wrpCode}, #{wrCountCur}, false ,#{woSdate}, #{woEdate}, #{lotNumber})
+	</insert>
+	
+	<select id="list" parameterType="hashMap" resultType="hashMap">
+		SELECT WOS_CODE, WOS.WO_CODE, WOS.WR_CODE, WARE.WR_NAME, WOS.WRP_CODE, WRP.WRP_NAME, WOS.WR_COUNT, WOS.WOS_STATE,
+			WOS_SDATE, WOS_EDATE, LOT_NUMBER
+		FROM WOS, WARE, WRP
+		WHERE WOS.WR_CODE = WARE.WR_CODE
+			AND WOS.WRP_CODE = WRP.WRP_CODE
+	</select>
+</mapper>

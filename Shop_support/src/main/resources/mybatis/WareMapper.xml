@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.mybatis.persistence.WareMapper">
+	<resultMap type="org.mybatis.domain.Ware" id="wareResultMap">
+		<id column="WR_CODE" property="wrCode" />
+		<result column="WR_NAME" property="wrName" />
+		<result column="WR_KIND" property="wrKind" />
+		<result column="BSN_NUMBER" property="bsnNumber" />
+	</resultMap>
+
+	<select id="wrKind" parameterType="string" resultType="string">
+		SELECT WR_KIND FROM WARE 
+		WHERE WR_CODE = #{wrCode}
+	</select>
+	
+	<select id="selectOne" parameterType="string" resultMap="wareResultMap">
+		SELECT * FROM WARE WHERE WR_CODE = #{wrCode}
+	</selec
+</mapper>

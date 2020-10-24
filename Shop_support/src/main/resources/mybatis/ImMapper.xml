@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.mybatis.persistence.ImMapper">
+	<resultMap type="org.mybatis.domain.Im" id="imResultMap">
+		<id column="Im_CODE" property="imCode" />
+		<result column="MR_CODE" property="mrCode"/>
+		<result column="WR_CODE" property="wrCode" />
+		<result column="BSN_NUMBER" property="bsnNumber" />
+		<result column="WR_COUNT" property="wrCount" />
+		<result column="IM_DATE" property="imDate" />
+		<result column="REF" property="ref" />
+		<result column="LOT_NUMBER" property="lotNumber" />
+	</resultMap>
+
+	<insert id='insert' parameterType="org.mybatis.domain.Im">				
+		INSERT INTO IM(IM_CODE ,MR_CODE, WR_CODE, BSN_NUMBER, WR_COUNT, IM_DATE, REF, LOT_NUMBER)
+		VALUES(#{imCode},#{mrCode},#{wrCode}, #{bsnNumber}, #{wrCount}, #{imDate}, #{ref},
+		#{lotNumber})
+	</insert>
+	
+	<select id="count" parameterType="org.mybatis.domain.Im" resultType="int">
+		SELECT COUNT(IM_CODE) AS COUNT FROM IM WHERE IM_CODE LIKE '%${imCode}%'
+	</select>
+	
+	<select id="list" parameterType="org.mybatis.domain.Im" resultType="hashMap">
+		SELECT IM.IM_CODE, IM.MR_CODE, IM.WR_CODE, WARE.WR_NAME, IM.BSN_NUMBER, 
+			AC.BSN_NAME, IM.WR_COUNT, IM.IM_DATE, IM.REF, IM.LOT_NUMBER
+		FROM IM, WARE, ACCOUNT AS AC
+		WHERE IM.WR_CODE = WARE.WR_CODE
+			AND IM.BSN_NUMBER = AC.BSN_NUMBER 
+	</select>
+	
+	<update id="updateRef" parameterType="string">
+		UPDATE IM SET REF = true WHERE IM_CODE = #{imCode}
+	</update>
+	
+	<select id="selectOverCount" parameterType="org.mybatis.domain.Im" resultType="boolean">
+		SELECT IF(<![CDATA[MR.WR_COUNT < SUM(IM.WR_COUNT)]]> + #{wrCount},true,false)
+		FROM MR, IM
+		WHERE MR.MR_CODE = IM.MR_CODE 
+		AND IM.MR_CODE = #{mrCode};
+	</select>
+</mapper>

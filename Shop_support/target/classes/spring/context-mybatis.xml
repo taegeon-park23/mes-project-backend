@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+		https://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/tx
+		http://www.springframework.org/schema/tx/spring-tx-4.3.xsd
+		http://www.springframework.org/schema/util
+		http://www.springframework.org/schema/util/spring-util-4.3.xsd">
+	
+	<util:properties id="dbconfig"
+		location="classpath:spring/dbconfig.properties" />
+
+	<bean id="dataSource" class="org.springframework.jdbc.datasource.SimpleDriverDataSource">
+		<property name="driverClass" value="#{dbconfig['dbconfig.driverClass']}"></property>
+		<property name="url" value="#{dbconfig['dbconfig.url']}"></property>
+		<property name="username" value="#{dbconfig['dbconfig.username']}"></property>
+		<property name="password" value="#{dbconfig['dbconfig.password']}"></property>
+	</bean>
+	
+ 	<tx:annotation-driven transaction-manager="transactionManager"/>
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource"/>
+	</bean>
+	
+	<bean id="sqlSessionFactory"
+		class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource"></property>
+		<property name="typeAliasesPackage" value="org.mybatis.domain"></property>
+		<property name="mapperLocations">
+			<array>
+				<value>classpath:mybatis/WroMapper.xml</value>
+				<value>classpath:mybatis/BomMapper.xml</value>
+				<value>classpath:mybatis/MrMapper.xml</value>
+				<value>classpath:mybatis/WoMapper.xml</value>
+				<value>classpath:mybatis/WosMapper.xml</value>
+				<value>classpath:mybatis/ImMapper.xml</value>
+				<value>classpath:mybatis/WareMapper.xml</value>
+				<value>classpath:mybatis/WarehouseMapper.xml</value>
+			</array>
+		</property>
+	</bean>
+
+	<bean id="sqlSessionTemplate"
+		class="org.mybatis.spring.SqlSessionTemplate">
+		<constructor-arg index="0" ref="sqlSessionFactory"></constructor-arg>
+	</bean>
+
+	<alias name="shop" alias="org.mybatis.domain.Shop" />
+</beans>
